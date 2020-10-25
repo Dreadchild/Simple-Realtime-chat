@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <!-- firebase init -->
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/7.17.1/firebase-app.js"></script>
+
+    <!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+    <script src="https://www.gstatic.com/firebasejs/7.17.1/firebase-analytics.js"></script>
+
+    <script>
+        // Your web app's Firebase configuration
+        var firebaseConfig = {
+            apiKey: "AIzaSyC9es9rL5X0JSHpH3YE60wQ6VDAbFzXu10",
+            authDomain: "chat-3-e9721.firebaseapp.com",
+            databaseURL: "https://chat-3-e9721.firebaseio.com",
+            projectId: "chat-3-e9721",
+            storageBucket: "chat-3-e9721.appspot.com",
+            messagingSenderId: "687829694715",
+            appId: "1:687829694715:web:10479a394a053f9e51185e",
+            measurementId: "G-M5RT8QXDKV"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        firebase.analytics();
+    </script>
+    <!-- end of firebase init -->
+
+    <!-- library firestore -->
+    <script src="https://www.gstatic.com/firebasejs/7.17.1/firebase-firestore.js"></script>
+
+</head>
+
+<body>
+    <div id="demo">
+
+
+    </div>
+
+
+    <div id="input-button">
+        <textarea placeholder="Ketik pesan anda.." id="input-pesan"></textarea>
+    </div>
+
+
+    <script>
+        let accountName = prompt('Input your name');
+        if(!accountName)accountName = "No Name";
+        //inisialisasi database
+        var db = firebase.firestore();
+
+        //membaca database di awal-awal dan melihat perubahan database
+        db.collection("chat")
+            .onSnapshot(function (snapshot) {
+                snapshot.docChanges().forEach(function (change) {
+                    if (change.type === "added") {
+                        console.log(change.doc.data());
+
+                        //menampilkan data ke html
+                        let tagNama = document.createElement('h3');
+                        let tagPesan = document.createElement('p');
+
+                        let textNama = document.createTextNode(change.doc.data().nama);
+                        let textPesan = document.createTextNode(change.doc.data().pesan)
+
+                        tagNama.appendChild(textNama);
+                        tagPesan.appendChild(textPesan);
+
+                        let div = document.getElementById('demo');
+                        div.appendChild(tagNama);
+                        div.appendChild(tagPesan);
+
+                        div.scrollTop = div.scrollHeight;
+                    }
+                });
+            });
+
+        // menambahkan chat ketika menekan tombol enter
+        let input = document.getElementById('input-pesan');
+        input.addEventListener("keyup", function (event) {
+            // Number 13 is the "Enter" key on the keyboard
+            if (event.keyCode === 13) {
+                //ngambil text dari input pesan
+                let inputText = document.getElementById('input-pesan').value;
+                //attribute yang akan ditambahkan ke database
+                db.collection("chat").add({
+                        nama: accountName,
+                        pesan: inputText
+                    })
+                    .then(function (docRef) {
+                        console.log("Document written with ID: ", docRef.id);
+                        document.getElementById('input-pesan').value = '';
+                    })
+                    .catch(function (error) {
+                        console.error("Error adding document: ", error);
+                    });
+            }
+        });
+    </script>
+
+</body>
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap');
+
+    body {
+        background-color: #0e0d12;
+        font-family: 'Open Sans', sans-serif;
+        padding-top: 40px;
+    }
+
+    #demo {
+        height: 400px;
+        width: 400px;
+        padding: 10px 40px;
+        margin-top: 120px;
+        margin: auto;
+        border-radius: 27px 27px 0px 0px;
+        overflow-y: auto;
+        background-color: #252331;
+    }
+
+    #demo::-webkit-scrollbar {
+        display: none;
+    }
+
+    #demo h3 {
+        text-align: right;
+        color: #505167;
+    }
+
+    #demo p {
+        text-align: end;
+        background-image: linear-gradient(to right, #3384fd, #3384fd);
+        margin-left: auto;
+        background-color: #1c56fc;
+        padding: 10px 20px;
+        border-radius: 8px;
+        margin-top: -14px;
+        margin-bottom: 14px;
+        max-width: 50%;
+        width: fit-content;
+        color: white;
+    }
+
+    #input-button {
+        text-align: center;
+    }
+
+    #input-pesan {
+        background-color: #1e1c26;
+        color: white;
+        outline: none;
+        width: 442px;
+        height: 50px;
+        padding: 10px 20px;
+        border-radius: 0px 0px 27px 27px;
+        border: none;
+        font-size: 16px;
+    }
+</style>
+
+</html>
